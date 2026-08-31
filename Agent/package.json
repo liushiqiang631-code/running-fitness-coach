@@ -1,0 +1,12 @@
+{
+  "name": "stride-running-coach",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "test": "node --test tests/*.test.js",
+    "check": "node --check server.js && node --check public/app.js && node --check public/core.js && node --check public/data.js"
+  }
+}

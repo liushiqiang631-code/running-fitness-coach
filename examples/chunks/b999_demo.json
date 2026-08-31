@@ -1,0 +1,47 @@
+[
+  {
+    "id": "b999-0001",
+    "text": "演示训练记录可以包含日期、活动类型、持续时间和主观感受。界面中的跑量、配速和恢复分数均是软件演示用的虚构数值，不代表某位运动员的真实记录。",
+    "source": "STRIDE 原创演示说明",
+    "source_file": "original-demo",
+    "chapter": "训练记录",
+    "section": "训练记录",
+    "heading_path": [
+      "训练记录"
+    ],
+    "page": "1",
+    "images": [],
+    "token_count": 0,
+    "char_count": 69
+  },
+  {
+    "id": "b999-0002",
+    "text": "本演示将训练后的主观反馈保存到当前浏览器。用户可以在页面中查看计划变化；清除浏览器站点数据会删除这些本地演示状态。",
+    "source": "STRIDE 原创演示说明",
+    "source_file": "original-demo",
+    "chapter": "反馈与复盘",
+    "section": "反馈与复盘",
+    "heading_path": [
+      "反馈与复盘"
+    ],
+    "page": "2",
+    "images": [],
+    "token_count": 0,
+    "char_count": 57
+  },
+  {
+    "id": "b999-0003",
+    "text": "检索结果展示资料标题和页码，帮助使用者回到自己拥有合法使用权的资料核实内容。演示资料不提供医疗诊断，也不应作为个人训练处方。",
+    "source": "STRIDE 原创演示说明",
+    "source_file": "original-demo",
+    "chapter": "知识来源",
+    "section": "知识来源",
+    "heading_path": [
+      "知识来源"
+    ],
+    "page": "3",
+    "images": [],
+    "token_count": 0,
+    "char_count": 62
+  }
+]

@@ -1,0 +1,16 @@
+# RAG 服务运行时依赖(python -m pip install -r rag/requirements.txt)
+# 版本为开发机实测;升级大版本前先跑 rag/tests/ 与 eval_retrieval 回归
+fastapi==0.135.1
+uvicorn==0.41.0
+httpx==0.28.1
+jieba==0.42.1
+tiktoken==0.12.0
+rank-bm25==0.2.2
+qdrant-client==1.17.0
+PyYAML==6.0.2
+numpy==2.3.5
+openai==2.31.0
+requests==2.32.5
+pypdf==6.10.2
+# 开发/评估用
+pytest==9.0.3

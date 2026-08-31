@@ -1,0 +1,75 @@
+# 跑步健身教练 Agent RAG 配置
+# API key 一律从环境变量读取: SILICONFLOW_API_KEY / DEEPSEEK_API_KEY
+
+qdrant:
+  url: "http://127.0.0.1:6333"
+  collection: "running_coach_demo"
+  vector_size: 1024
+  distance: "Cosine"          # dense, Cosine
+  trust_env: false            # 本机 docker Qdrant 需绕过本机代理直连(localhost 走代理会 502)
+
+models:
+  embed:
+    name: "BAAI/bge-m3"
+    base: "https://api.siliconflow.cn"
+    dim: 1024
+    max_tokens: 8000          # bge-m3 上下文上限,超长块截断
+    batch_size: 128           # API 单批(单次调用固定延迟 ~4-5s,大 batch 摊薄)
+  rerank:
+    name: "BAAI/bge-reranker-v2-m3"
+    base: "https://api.siliconflow.cn"
+    max_tokens: 4000          # 超长块送 reranker 前截断
+  chat:
+    name: "Qwen/Qwen3-30B-A3B-Instruct-2507"   # 硅基流动可用;Qwen3-30B-A3B(旧ID)已禁用
+    base: "https://api.siliconflow.cn"
+    # 备选: DeepSeek
+    # name: "deepseek-chat"
+    # base: "https://api.deepseek.com"
+    stream: true
+
+retrieval:
+  dense_top_k: 50             # 语义通道 top-K
+  bm25_top_k: 50              # BM25 通道 top-K
+  metadata_filter: on         # 专有名词→硬过滤; 主题词(营养/损伤/周期化)→第三路通道加分
+  rrf_k: 60                   # RRF 融合常数
+  rerank_input: 20            # 进 reranker 的候选数(50→20 减少 API 输入,延迟优化)
+  rerank_top_n: 8             # 送 LLM 的块数(主块)
+  rerank_weight: 0.5          # 最终排序 = w*rerank归一 + (1-w)*rrf归一(纯重排曾把数据题正确页挤出 top10)
+  rerank_timeout: 1.8         # rerank API 硬超时(秒),超时降级为 RRF 排序(保证延迟上界)
+  query_cache_size: 512       # 查询嵌入 + 完整检索结果 LRU 缓存(重复问题即时返回)
+  max_context_tokens: 4000    # LLM 上下文预算
+  same_doc_expand: on         # 同文档扩展: 主块附带同书相邻块(±窗口),修复切块拆散表格/段落
+  same_doc_window: 2          # 每侧取 2 个邻块
+  same_doc_max: 8             # 最多额外追加 8 个邻块
+
+# 路径均为相对 config.yaml 所在目录(rag/config/),由 config_loader 解析为绝对路径 → 项目可整体移动
+paths:
+  json_dir: "../../examples/chunks"  # Only original demonstration content is included.
+  images_dir: "../data/images"  # Optional locally licensed images; never committed.
+  cache_dir: "../data/cache"
+  bm25_dir: "../data/bm25"
+  eval_dir: "../../examples/eval"
+
+# 跑步术语补充词典(BM25 分词用,防止被 jieba 切碎)
+bm25_terms:
+  - VDOT
+  - 法特莱克
+  - 配速
+  - 间歇跑
+  - 阈值跑
+  - 乳酸门槛
+  - 马拉松
+  - 半程马拉松
+  - 最大摄氧量
+  - 心率
+  - 周期化
+  - 超量恢复
+  - 1RM
+  - BMI
+  - 升糖指数
+  - 力量训练
+  - 有氧
+  - 无氧
+  - 深蹲
+  - 硬拉
+  - 卧推

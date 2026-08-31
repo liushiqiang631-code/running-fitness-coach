@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>跑步健身教练 Agent</title>
+<style>
+  :root { --accent:#2f7d4f; --accent2:#1d6f4d; --bg:#f6f8f6; --card:#fff; --text:#1f2a24; --muted:#6b7a72; --border:#e3e9e4; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif; background:var(--bg); color:var(--text); }
+  header { background:linear-gradient(135deg,#1d6f4d,#2f8f5e); color:#fff; padding:18px 28px; }
+  header h1 { margin:0; font-size:20px; }
+  header p { margin:4px 0 0; opacity:.85; font-size:13px; }
+  main { max-width:820px; margin:0 auto; padding:20px; }
+  #chat { min-height:400px; }
+  .msg { margin:14px 0; display:flex; }
+  .msg .bubble { max-width:82%; padding:12px 16px; border-radius:12px; line-height:1.65; font-size:15px; white-space:pre-wrap; }
+  .msg.user { justify-content:flex-end; }
+  .msg.user .bubble { background:var(--accent); color:#fff; border-bottom-right-radius:4px; }
+  .msg.assistant .bubble { background:var(--card); border:1px solid var(--border); border-bottom-left-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,.04); }
+  .sources { margin-top:10px; padding-top:8px; border-top:1px dashed var(--border); font-size:12px; color:var(--muted); }
+  .sources div { margin-top:4px; }
+  .sources b { color:var(--accent2); }
+  .cursor::after { content:"▌"; color:var(--accent); animation:blink 1s infinite; }
+  @keyframes blink { 50% { opacity:0; } }
+  form { position:sticky; bottom:0; background:var(--bg); padding:14px 0; display:flex; gap:10px; }
+  textarea { flex:1; min-height:48px; max-height:160px; resize:vertical; padding:12px 14px; border:1px solid var(--border); border-radius:10px; font-size:15px; font-family:inherit; outline:none; }
+  textarea:focus { border-color:var(--accent); }
+  button { background:var(--accent); color:#fff; border:none; border-radius:10px; padding:0 22px; font-size:15px; cursor:pointer; }
+  button:disabled { opacity:.6; cursor:not-allowed; }
+  .hint { color:var(--muted); font-size:12px; text-align:center; padding:6px 0 2px; }
+  .status { font-size:12px; color:var(--muted); padding:4px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🏃 跑步健身教练 Agent</h1>
+  <p>基于 21 本专业文献的知识问答 · 回答附来源与页码</p>
+</header>
+<main>
+  <div id="chat"></div>
+  <div class="status" id="status"></div>
+  <form id="frm">
+    <textarea id="inp" placeholder="试试:VDOT 42 马拉松配速多少? / 法特莱克训练怎么做? / 1RM 怎么测?" rows="2"></textarea>
+    <button id="send">发送</button>
+  </form>
+  <div class="hint">训练方法 · 配速体系 · 周期化 · 伤病康复 · 多流派对照</div>
+</main>
+
+<script>
+const chat = document.getElementById('chat');
+const inp = document.getElementById('inp');
+const btn = document.getElementById('send');
+const statusEl = document.getElementById('status');
+let history = [];
+let busy = false;
+
+function addMsg(role, text) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  b.textContent = text;
+  div.appendChild(b);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+  return b;
+}
+
+async function send() {
+  const q = inp.value.trim();
+  if (!q || busy) return;
+  busy = true; btn.disabled = true; statusEl.textContent = '思考中…';
+  addMsg('user', q);
+  const bubble = addMsg('assistant', '');
+  bubble.classList.add('cursor');
+  let answer = '';
+  try {
+    const resp = await fetch('/chat', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ query: q, history })
+    });
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, {stream:true});
+      const lines = buf.split('\n');
+      buf = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const payload = line.slice(6);
+        if (payload === '[DONE]') continue;
+        const obj = JSON.parse(payload);
+        if (obj.delta) { answer += obj.delta; bubble.textContent = answer; chat.scrollTop = chat.scrollHeight; }
+      }
+    }
+  } catch (e) {
+    answer += '\n[网络错误] ' + e.message;
+    bubble.textContent = answer;
+  }
+  bubble.classList.remove('cursor');
+  history.push({role:'user', content:q}, {role:'assistant', content:answer});
+  if (history.length > 8) history = history.slice(-8);
+  statusEl.textContent = ''; busy = false; btn.disabled = false; inp.value = '';
+  inp.focus();
+}
+
+document.getElementById('frm').addEventListener('submit', e => { e.preventDefault(); send(); });
+inp.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+});
+inp.focus();
+</script>
+</body>
+</html>
