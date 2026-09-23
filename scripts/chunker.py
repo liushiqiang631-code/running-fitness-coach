@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""按 MinerU content_list_v2 分块 → <configured_json_dir>/<book_id>_<document_title>.json。
+"""按 MinerU content_list_v2 分块 → 跑步健身教练json集合/<book_id>_<书名>.json。
 
-处理已获得授权的结构化文档:
+对齐 跑步健身教练Agent_工作总结与方案 §2.5 / §4.2:
 - content_list_v2 为权威数据源(页码+标题层级),比解析 md 可靠
 - 按标题树切块,超长段落按 token 切分(上限 800 token)
 - 噪音块(page_header/footer/footnote/number)直接丢弃

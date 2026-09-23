@@ -7,7 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.resolve(__dirname, 'public');
 const MAX_BODY_BYTES = 1024 * 1024;
 const RAG_UNAVAILABLE_MESSAGE =
-  '知识服务暂未连接；请按 README 启动 RAG 服务并配置模型后重试。训练计划与数据功能仍可使用。';
+  '知识服务暂未连接；请启动 rag/start_server.bat 后重试。训练计划与数据功能仍可使用。';
 const SECURITY_HEADERS = {
   'content-security-policy': "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",
   'referrer-policy': 'no-referrer',

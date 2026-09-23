@@ -28,7 +28,7 @@ import tiktoken
 from rank_bm25 import BM25Okapi
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts"))
-from config_loader import load_config, get_qdrant, get_api_key, require_external_api, external_api_enabled
+from config_loader import load_config, get_qdrant, get_api_key
 
 CFG = load_config()
 JSON_DIR = CFG["paths"]["json_dir"]
@@ -63,6 +63,7 @@ BOOK_KEYWORD_STRONG = {
     "邦帕": ["b010"],
     "nsca": ["b002", "b003", "b012", "b013", "b014"],
     "美国国家体能": ["b002", "b003", "b012", "b013", "b014"],
+    "uphill": ["b019"],   # Training for the Uphill Athlete(书名英文词)
 }
 # 主题词(弱信号): 营养/损伤/力量训练 等词全库多本书都会讨论。若也参与硬过滤,
 # 泛化问题(如「跑后怎么补充营养」)会被人为压到单本书的召回面,故不用于过滤。
@@ -80,6 +81,9 @@ BOOK_KEYWORD_TOPIC = {
     "康复": ["b016"],
     "生理学": ["b017"],
     "解剖": ["b018"],
+    "越野": ["b019"],     # 越野/山地跑主题主要在 uphill athlete
+    "上坡": ["b019"],
+    "山地跑": ["b019"],
 }
 # 注意: 多个强关键词命中时取并集(should/OR); 互斥关键词(卡诺瓦 vs 丹尼尔斯)各自生效
 
@@ -143,7 +147,6 @@ def embed_texts(texts, base=None, model=None):
     """调用 bge-m3 批量嵌入,失败指数退避。返回向量列表。"""
     base = base or EMBED["base"]
     model = model or EMBED["name"]
-    require_external_api()
     key = get_api_key("siliconflow")
     headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
     payload = {"model": model, "input": texts}
@@ -272,7 +275,7 @@ def truncate_doc(text, max_tokens):
 def rerank_scores(query, candidate_ids, timeout=None):
     """bge-reranker-v2-m3 对全部候选打分,返回 {id: relevance_score}。失败/超时返回空(dict)。
     timeout: 硬超时(秒)。超时降级 → 调用方退回 RRF 排序,保证延迟上界。"""
-    if not candidate_ids or not external_api_enabled():
+    if not candidate_ids:
         return {}
     timeout = timeout or RET.get("rerank_timeout", 2.5)
     chunks = load_chunks()
@@ -281,7 +284,6 @@ def rerank_scores(query, candidate_ids, timeout=None):
     if not valid:
         return {}
     docs = [truncate_doc(chunks[c].get("text") or "", RERANK["max_tokens"]) for c in valid]
-    require_external_api()
     key = get_api_key("siliconflow")
     headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
     payload = {"model": RERANK["name"], "query": query, "documents": docs}
@@ -351,9 +353,10 @@ def expand_same_doc(cids, window=None, max_add=None):
 
 # ---------------- 总入口 ----------------
 @functools.lru_cache(maxsize=RET.get("query_cache_size", 512))
-def _retrieve_cached(query, top_n):
+def _retrieve_cached(query):
     """完整检索管线(缓存核心): 返回 ((cid, score), ...) 有序元组。
-    缓存键 = (query, top_n): 完全相同的问题直接命中,即时返回。"""
+    缓存键 = query: 完全相同的问题直接命中,即时返回(管线内部与 top_n 无关,
+    切片由 retrieve() 做,避免同题不同 top_n 存重复缓存)。"""
     dense_k = RET["dense_top_k"]
     bm25_k = RET["bm25_top_k"]
 
@@ -412,7 +415,7 @@ def retrieve(query, top_n=None, verbose=False):
     """
     if top_n is None:
         top_n = RET["rerank_top_n"]
-    ordered = _retrieve_cached(query, top_n)
+    ordered = _retrieve_cached(query)
     # 主块 = 重排后的前 top_n; 同文档扩展只对主块做: 邻块追加其后,不挤占主块位置
     primaries = ordered[:top_n]
     ids = [cid for cid, _ in primaries]

@@ -13,7 +13,7 @@ import re
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts"))
-from config_loader import load_config, get_api_key, require_external_api
+from config_loader import load_config, get_api_key
 
 from rag_core import retrieve, load_chunks, tokenize
 
@@ -29,7 +29,6 @@ _client = None
 
 def get_client():
     global _client
-    require_external_api()
     if _client is None:
         _client = OpenAI(base_url=CHAT["base"], api_key=get_api_key("siliconflow"))
     return _client

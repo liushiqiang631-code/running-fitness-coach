@@ -9,22 +9,14 @@ import yaml
 import httpx
 from qdrant_client import QdrantClient
 
-CONFIG_PATH = os.environ.get("RUNNING_COACH_CONFIG") or os.path.join(os.path.dirname(__file__), "..", "config", "config.yaml")
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), "..", "config", "config.yaml")
 CONFIG_DIR = os.path.dirname(os.path.abspath(CONFIG_PATH))
 
 
 def load_config():
     with open(CONFIG_PATH, encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
-    for key in ("json_dir", "images_dir", "cache_dir", "bm25_dir", "eval_dir"):
-        override = os.environ.get("RUNNING_COACH_" + key.upper())
-        if override:
-            cfg.setdefault("paths", {})[key] = override
-    if os.environ.get("QDRANT_URL"):
-        cfg["qdrant"]["url"] = os.environ["QDRANT_URL"]
-    if os.environ.get("QDRANT_COLLECTION"):
-        cfg["qdrant"]["collection"] = os.environ["QDRANT_COLLECTION"]
-    # Resolve relative paths against the selected config file.
+    # 相对路径统一基于 config.yaml 所在目录解析 → 项目可整体移动,换机器/换盘不用改
     for key, val in cfg.get("paths", {}).items():
         if val and not os.path.isabs(val):
             cfg["paths"][key] = os.path.normpath(os.path.join(CONFIG_DIR, val))
@@ -50,13 +42,3 @@ def get_api_key(provider="siliconflow"):
     if provider == "deepseek":
         return os.environ.get("DEEPSEEK_API_KEY", "")
     return os.environ.get("SILICONFLOW_API_KEY", "")
-
-
-def external_api_enabled():
-    """External model calls require explicit opt-in, even when a key is inherited."""
-    return os.environ.get("RUNNING_COACH_ENABLE_EXTERNAL_API", "0") == "1"
-
-
-def require_external_api():
-    if not external_api_enabled():
-        raise RuntimeError("External model calls are disabled. See README for explicit opt-in.")

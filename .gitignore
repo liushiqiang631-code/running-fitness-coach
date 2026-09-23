@@ -1,4 +1,31 @@
-# Credentials and local machine configuration
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Node
+node_modules/
+
+# RAG 可重建数据(由 json_dir 语料重新生成,勿入库)
+rag/data/cache/
+rag/data/bm25/
+rag/qdrant_storage/
+# 评估报告是生成产物,测试集 testset.json 保留入库
+rag/data/eval/report.txt
+rag/data/eval/answer_report.txt
+
+# 临时文件
+*.tmp
+*.log
+# MinerU 解析中间产物(可重建)
+_work/
+
+# pytest 缓存
+.pytest_cache/
+
+# Public repository safeguards for local credentials and non-public source materials
 .env
 .env.*
 !.env.example
@@ -10,10 +37,6 @@
 *credentials*
 *secrets*
 config.local.*
-
-# Runtime state, private corpus, generated databases and reports
-rag/data/
-data/
 private/
 corpus/
 documents/
@@ -22,37 +45,15 @@ logs/
 sessions/
 reports/
 screenshots/
-qdrant_storage/
-*report.txt
-*.log
-*.pkl
-*.pickle
-*.npy
-*.npz
-*.sqlite*
-*.db
 *.pdf
 *.doc
 *.docx
-*.png
-*.jpg
-*.jpeg
-*.webp
+*.pkl
+*.pickle
+*.sqlite*
+*.db
+*.npy
+*.npz
 *.zip
 *.tar
 *.gz
-
-# Tool caches and local environments
-.git/
-.venv/
-venv/
-node_modules/
-__pycache__/
-*.py[cod]
-.pytest_cache/
-.cache/
-_work/
-.playwright-cli/
-.playwright-mcp/
-.DS_Store
-Thumbs.db

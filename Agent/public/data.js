@@ -1,14 +1,14 @@
-/** Fictional seed data for the product demo; never real athlete records. It is intentionally serialisable so callers
+/** Seed data for the product demo. It is intentionally serialisable so callers
  * can clone it into localStorage without special handling. */
 export const demoData = {
   version: 3,
   athlete: {
-    id: 'athlete-demo',
-    name: '演示跑者',
-    avatarInitials: '演',
+    id: 'athlete-linye',
+    name: '林野',
+    avatarInitials: '林',
     level: '进阶跑者',
     age: 31,
-    city: '示例城市',
+    city: '上海',
     weeklyAvailability: ['周一', '周二', '周三', '周四', '周六', '周日'],
     preferredTrainingTime: '清晨',
     trainingDaysPerWeek: 5,

@@ -233,7 +233,7 @@ function profile() {
 }
 
 function login() {
-  return `<main class="auth-page" id="app-main"><section class="auth-visual"><a href="#/login" class="brand"><span class="brand-mark"></span>STRIDE</a><h1>跑出下一步，<br>而不是更多数据。</h1><p>把计划、训练、反馈和判断连成一条线。</p></section><section class="auth-panel"><div><p class="eyebrow">WELCOME BACK</p><h2>继续你的训练周期</h2><form id="login-form" class="form-grid"><div class="field"><label for="email">邮箱</label><input id="email" type="email" value="demo@example.com" required></div><div class="field"><label for="password">密码</label><input id="password" type="password" value="stride2026" required></div><button class="btn primary" type="submit">进入 STRIDE</button></form><p class="small muted" style="margin-top:18px">还没有档案？ <a href="#/onboarding"><strong>开始建档</strong></a></p></div></section></main>`;
+  return `<main class="auth-page" id="app-main"><section class="auth-visual"><a href="#/login" class="brand"><span class="brand-mark"></span>STRIDE</a><h1>跑出下一步，<br>而不是更多数据。</h1><p>把计划、训练、反馈和判断连成一条线。</p></section><section class="auth-panel"><div><p class="eyebrow">WELCOME BACK</p><h2>继续你的训练周期</h2><form id="login-form" class="form-grid"><div class="field"><label for="email">邮箱</label><input id="email" type="email" value="runner@stride.cn" required></div><div class="field"><label for="password">密码</label><input id="password" type="password" value="stride2026" required></div><button class="btn primary" type="submit">进入 STRIDE</button></form><p class="small muted" style="margin-top:18px">还没有档案？ <a href="#/onboarding"><strong>开始建档</strong></a></p></div></section></main>`;
 }
 
 const onboardingSteps=[

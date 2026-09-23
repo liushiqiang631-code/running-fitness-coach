@@ -49,8 +49,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="跑步健身教练 Agent", version="0.1.0", lifespan=lifespan)
 # 书页插图: chunk.images 存相对 images 根目录的路径(如 b001/xxx.jpg),经此路由展示
-if os.path.isdir(IMAGE_DIR):
-    app.mount("/images", StaticFiles(directory=IMAGE_DIR), name="images")
+app.mount("/images", StaticFiles(directory=IMAGE_DIR), name="images")
 
 
 class ChatRequest(BaseModel):

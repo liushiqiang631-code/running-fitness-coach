@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""全量嵌入配置目录中的文档分块 → bge-m3 → 缓存到 rag/data/cache/。
+"""全量嵌入 14,777 块 → bge-m3 → 缓存到 rag/data/cache/。
 
 特性:
 - 批量 128 块/次调用 SiliconFlow /v1/embeddings(单次调用固定延迟 ~4-5s,大 batch 摊薄)
@@ -22,7 +22,7 @@ import numpy as np
 import tiktoken
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from config_loader import load_config, get_api_key, require_external_api
+from config_loader import load_config, get_api_key
 
 CFG = load_config()
 JSON_DIR = CFG["paths"]["json_dir"]
@@ -75,7 +75,6 @@ def save_cache(ids, vectors):
 
 def embed_batch(client, texts):
     """调用 bge-m3,返回向量列表。失败重试(指数退避,最多 5 次)。"""
-    require_external_api()
     key = get_api_key("siliconflow")
     headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
     payload = {"model": EMBED["name"], "input": texts}
